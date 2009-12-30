@@ -1,6 +1,6 @@
 {
     "name": "Hudson Extension",
-    "version": "0.7",
+    "version": "0.8",
     "description": "This Extensions monitors Hudson.",
     "icons": { "48": "icon.png", "128": "icon128.png" },
     "options_page": "options.html",
