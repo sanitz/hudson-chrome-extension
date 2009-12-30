@@ -31,7 +31,7 @@ function startRequest() {
     getBuildStatus(
         function(jobs) {
             var success = jobs.every(function (job) { 
-                return job.color == 'blue';
+                return job.color == 'blue' || job.color == 'blue_anime';
             });
             if (success) { 
                 setStatus("OK", GREEN); 
