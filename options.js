@@ -6,7 +6,7 @@ init();
 function init() {
     hudsonUrlTextbox = document.getElementById("hudson-url");
     saveButton = document.getElementById("save-button");
-    hudsonUrlTextbox.value = localStorage.hudsonUrl || "";
+    hudsonUrlTextbox.value = chrome.extension.getBackgroundPage().getHudsonUrl();
     markClean();
 }
 
