@@ -5,11 +5,11 @@ hudson.open = function() {
     function sameUrl(orig, other) {
         if (other.indexOf(orig) != 0)
             return false;
-        return other.length == orig.length || 
+        return other.length == orig.length ||
             other[orig.length] == '?' ||
             other[orig.length] == '#';
     }
-    
+
     return function (url) {
         chrome.tabs.getAllInWindow(undefined, function(tabs) {
             for (var i = 0, tab; tab = tabs[i]; i++) {
@@ -24,9 +24,9 @@ hudson.open = function() {
 }();
 
 hudson.init = function (conf, results) {
-    var hudson = {},
-        xhr = undefined,
+    var xhr = undefined,
         timeoutId = undefined,
+        successColors = /(blue|grey|disabled)/,
         build = {
             ok :   {    msg : "OK",     color : [0, 128, 0, 255] },
             failed : {  msg : "Fail",   color : [255, 0, 0, 255] },
@@ -48,7 +48,7 @@ hudson.init = function (conf, results) {
 
     function isSuccess(jobs) {
         return jobs.every(function (job) {
-            return job.color == 'blue' || job.color == 'blue_anime';
+            return successColors.test(job.color);
         });
     }
 
