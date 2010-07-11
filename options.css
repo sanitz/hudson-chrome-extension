@@ -39,6 +39,14 @@ body {
   margin-left:2px;
 }
 
-#footer {
-  margin-top:4em;
+.footer {
+  margin-top: 12px;
 }
+
+#save-status {
+    background-color: #ffff00;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 4px;
+}                                                        }
+
