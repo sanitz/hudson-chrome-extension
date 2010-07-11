@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body {
+        font-family: Helvetica, Arial;
+        font-size: small;
+        min-width: 300px;
+    }
+
+    .heading {
+        font-weight: bold;
+        margin: 2px;
+        padding: 6px;
+    }
+
+    .url {
+        margin: 4px;
+        padding: 4px;
+    }
+    
+    .error {
+        background-color: #ff0000;
+        color: #000;
+        margin 6px;
+        font-weight: bold;
+        padding: 9px;
+
+    }
+
+    td {
+        border-bottom: 1px solid #eee;
+        padding: 2px;
+
+    }
+</style>
+<script src="status.js"></script>
+</head>
+<body onload="hudson.status.show()">
+<div id="content">
+    <span id="heading" class="heading">Loading...</span>
+</div>
+<div>
+    <span id="options"></span>
+</div>
+</body>
+</html>
+

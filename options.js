@@ -1,26 +1,40 @@
-var hudsonUrlTextbox;
-var saveButton;
+hudson.options = function(conf) {
+    var hudsonUrlTextbox, pollIntervallTextbox, saveButton, saveStatus;
 
-init();
+    function showSaveStatus(show) {
+        saveStatus.style.display = show ? '' : "none";
+        saveButton.disabled = show;
+    }
 
-function init() {
-    hudsonUrlTextbox = document.getElementById("hudson-url");
-    saveButton = document.getElementById("save-button");
-    hudsonUrlTextbox.value = chrome.extension.getBackgroundPage().getHudsonUrl();
-    markClean();
-}
+    function display() {
+        hudsonUrlTextbox.value = conf.hudsonURL();
+        pollIntervallTextbox.value = conf.pollIntervall();
+        saveButton.disabled = true;
+    }
 
-function save() {
-    localStorage.hudsonUrl = hudsonUrlTextbox.value;
-    markClean();
-    chrome.extension.getBackgroundPage().init();
-}
+    return { 
+        save : function () {
+            conf.set({ 
+                hudsonURL : hudsonUrlTextbox.value,
+                pollIntervall: pollIntervallTextbox.value 
+            });
+            showSaveStatus(true);
+            display();
+            chrome.extension.getBackgroundPage().hudson.init();
+        },
 
-function markDirty() {
-    saveButton.disabled = false;
-}
+        markDirty : function () {
+            showSaveStatus(false)
+        },
 
-function markClean() {
-    saveButton.disabled = true;
-}
+
+        init : function () {
+            hudsonUrlTextbox = document.getElementById("hudson-url"), 
+            pollIntervallTextbox = document.getElementById("poll-intervall"), 
+            saveButton = document.getElementById("save-button");
+            saveStatus = document.getElementById("save-status");
+            display();
+        }
+    };
+}(hudson.conf);
 

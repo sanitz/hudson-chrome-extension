@@ -1,118 +1,112 @@
-var DEFAULT_URL = 'http://hudson.grails.org/';
+var hudson = hudson || {};
+hudson.results = { lastUpdate : 'never' };
 
-var GREEN = [0, 128, 0, 255];
-var RED = [255, 0, 0, 255];
-var GREY = [128, 128, 128, 255];
-
-var second = 1000;
-var minute = 60 * second;
-
-var pollInterval = 1 * minute;
-var requestTimeout = 2 * second;
-var requestFailureCount = 0;
-
-chrome.browserAction.onClicked.addListener( goHudson );
-
-function init() {
-    chrome.browserAction.setTitle({ title: "Hudson " + getHudsonUrl()});
-    startRequest();
-}
-
-function scheduleRequest() {
-    window.setTimeout(startRequest, pollInterval);
-}
-
-function setStatus(text, color) {
-    chrome.browserAction.setBadgeText({ text:  text });
-    chrome.browserAction.setBadgeBackgroundColor({ color:  color });
-}
-
-function startRequest() {
-    getBuildStatus(
-        function(jobs) {
-            var success = jobs.every(function (job) { 
-                return job.color == 'blue' || job.color == 'blue_anime';
-            });
-            if (success) { 
-                setStatus("OK", GREEN); 
-            } else { 
-                setStatus("Fail", RED); 
-            }
-            scheduleRequest();
-        },
-        function() {
-            setStatus("?", GREY); 
-            scheduleRequest();
-        }
-    );
-}
-    
-function getBuildStatus(onSuccess, onError) {
-    var xhr = new XMLHttpRequest();
-    var abortTimerId = window.setTimeout(function() { 
-        xhr.abort(); }, requestTimeout);
-
-    function handleSuccess(jobs) {
-        requestFailureCount = 0;
-        window.clearTimeout(abortTimerId);
-        if (onSuccess)
-            onSuccess(jobs);
-    }
-
-    function handleError() {
-        ++requestFailureCount;
-        window.clearTimeout(abortTimerId);
-        if (onError)
-            onError();
+hudson.open = function() {
+    function sameUrl(orig, other) {
+        if (other.indexOf(orig) != 0)
+            return false;
+        return other.length == orig.length || 
+            other[orig.length] == '?' ||
+            other[orig.length] == '#';
     }
     
-    try {
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState != 4) return;
-            if (xhr.responseText) {
-                var response = JSON.parse(xhr.responseText);
-                if (response.jobs) {
-                    handleSuccess(response.jobs);
+    return function (url) {
+        chrome.tabs.getAllInWindow(undefined, function(tabs) {
+            for (var i = 0, tab; tab = tabs[i]; i++) {
+                if (tab.url && sameUrl(url, tab.url)) {
+                    chrome.tabs.update(tab.id, { selected : true });
                     return;
-                } 
+                }
             }
-            handleError();
-        }
-        xhr.onerror = function() { setStatus("???", GREY); };
-        xhr.open("GET", getFeedUrl(), true);
-        xhr.send(null);
-    } catch(e) {
-        handleError();
+            chrome.tabs.create({ url: url });
+        });
+    };
+}();
+
+hudson.init = function (conf, results) {
+    var hudson = {},
+        xhr = undefined,
+        timeoutId = undefined,
+        build = {
+            ok :   {    msg : "OK",     color : [0, 128, 0, 255] },
+            failed : {  msg : "Fail",   color : [255, 0, 0, 255] },
+            unknown: {  msg : "?",      color : [128, 128, 128, 255] },
+        };
+
+    function setState(state, msg) {
+        console.log(state, msg, new Date());
+        chrome.browserAction.setBadgeText({ text:  state.msg });
+        chrome.browserAction.setBadgeBackgroundColor({ color:  state.color });
+        chrome.browserAction.setTitle({ title : msg +"\nRight click for options" });
     }
-}
 
-function getFeedUrl() {
-    return  getHudsonUrl() + 'api/json';
-}
+    function onerror(msg) {
+        console.log(msg);
+        results.error = msg;
+        setState(build.unknown, msg);
+    }
 
-function getHudsonUrl() {
-    if (localStorage.hudsonUrl)
-        return localStorage.hudsonUrl;
-    return DEFAULT_URL;
-}
+    function isSuccess(jobs) {
+        return jobs.every(function (job) {
+            return job.color == 'blue' || job.color == 'blue_anime';
+        });
+    }
 
-function isHudsonUrl(url) {
-    var hudson = getHudsonUrl();
-    if (url.indexOf(hudson) != 0)
-        return false;
-    return url.length == hudson.length || url[hudson.length] == '?' ||
-                       url[hudson.length] == '#';
-}
-
-
-function goHudson() {
-    chrome.tabs.getAllInWindow(undefined, function(tabs) {
-        for (var i = 0, tab; tab = tabs[i]; i++) {
-            if (tab.url && isHudsonUrl(tab.url)) {
-                chrome.tabs.update(tab.id, {selected: true});
-                return;
-            }
+    function timeout () {
+        console.log("timeout");
+        if (xhr) {
+            xhr.abort();
         }
-        chrome.tabs.create({url: getHudsonUrl()});
-  });
-}
+        newRequest();
+    }
+
+    function newRequest() {
+        window.setTimeout(start, 60 * 1000 * conf.pollIntervall());
+    }
+
+    function start() {
+        xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = onchange;
+        xhr.open("GET", conf.apiURL(), true);
+        try {
+            xhr.send("");
+            timeoutId = window.setTimeout(timeout, 10 * 1000);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    function onchange () {
+        if (xhr.readyState != 4) return;
+        results.lastUpdate = new Date();
+        console.log("onchange", xhr);
+        window.clearTimeout(timeoutId);
+        if (xhr.status != 200) {
+            onerror("Failed to load data: " + xhr.statusText +  " (" + xhr.status + ")");
+        } else {
+            display(xhr.responseText);
+        }
+        newRequest();
+    }
+
+    function display(text) {
+        try {
+            results.hudson = JSON.parse(text);
+        } catch (e) {
+            onerror("Failed to parse JSON data from " + conf.hudsonUrl() + ": " + e);
+            return;
+        }
+        results.error = undefined;
+        if (isSuccess(results.hudson.jobs)) {
+            setState(build.ok, "Build OK");
+        } else {
+            setState(build.failed, "Build Failed!");
+        }
+    }
+
+    return function () {
+        setState(build.unknown, "Build status unknown");
+        start();
+    };
+
+}(hudson.conf, hudson.results);
