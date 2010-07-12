@@ -15,7 +15,7 @@ you the status of your jobs and the time of the last update.
 You can get the source for this extension and file bugs or feature requests at
 github: <http://github.com/sanitz/hudson-chrome-extension>
 
-You install the extension at the [offical
+You can install the extension at the [offical
 Google Extension site][extension_site].
 
 Changelog
