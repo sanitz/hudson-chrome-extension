@@ -23,4 +23,4 @@ Changelog
 
 TODO
 
-[extension_site]: [http://bit.ly/hudson_extension]
+[extension_site]: http://bit.ly/hudson_extension
