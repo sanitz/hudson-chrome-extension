@@ -11,10 +11,7 @@ hudson.conf = function () {
     }
 
     function setHudsonURL(url) {
-        var http = 'http://', slash = '/';
-        if (http !== url.substr( 0, http.length ) ) {
-            url = http + url;
-        }
+        var slash = '/';
         if (slash !== url.substr( url.length  - slash.length, slash.length ) ) {
             url = url + slash;
         }
