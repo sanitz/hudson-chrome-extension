@@ -1,5 +1,11 @@
+This project moved!
+===================
+
+The new location: https://github.com/sanitz/jenkins-chrome-extension
+
+
 Hudson Extension for Google Chrome
-==================================
+----------------------------------
 
 This extension monitors Hudson, a continuous integration server. For more
 information about Hudson take a look at: <http://hudson-ci.org/>
