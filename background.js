@@ -37,7 +37,7 @@ hudson.init = function (conf, results) {
         console.log(state, msg, new Date());
         chrome.browserAction.setBadgeText({ text:  state.msg });
         chrome.browserAction.setBadgeBackgroundColor({ color:  state.color });
-        chrome.browserAction.setTitle({ title : msg +"\nRight click for options" });
+        chrome.browserAction.setTitle({ title : msg +"\n\nRight click for options" });
     }
 
     function onerror(msg) {
@@ -49,6 +49,14 @@ hudson.init = function (conf, results) {
     function isSuccess(jobs) {
         return jobs.every(function (job) {
             return successColors.test(job.color);
+        });
+    }
+
+    function getFailedJobsNames(jobs) {
+        return jobs.filter(function (job) {
+            return ! successColors.test(job.color);
+        }).map(function (job) {
+            return job.name;
         });
     }
 
@@ -100,7 +108,24 @@ hudson.init = function (conf, results) {
         if (isSuccess(results.hudson.jobs)) {
             setState(build.ok, "Build OK");
         } else {
-            setState(build.failed, "Build Failed!");
+            var failed_jobs = getFailedJobsNames(results.hudson.jobs);
+            setState(build.failed, getBuildFailedMessage( failed_jobs ));
+        }
+    }
+
+    function getBuildFailedMessage(failed_jobs) {
+        if (1 == failed_jobs.length) {
+            return "Build \"" + failed_jobs[0] + "\" Failed!";
+        } else {
+            var max_failed_jobs_in_list = 5;
+            if (failed_jobs.length > max_failed_jobs_in_list) {
+                var not_shown_jobs = (failed_jobs.length - max_failed_jobs_in_list);
+                failed_jobs = failed_jobs.slice(0, max_failed_jobs_in_list);
+                failed_jobs.push("... " + not_shown_jobs + " more");
+            }
+            /* adding some indent */
+            failed_jobs = failed_jobs.map(function (name) { return "    " + name});
+            return "Builds Failed:\n" + failed_jobs.join("\n");
         }
     }
 
