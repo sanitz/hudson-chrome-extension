@@ -13,6 +13,15 @@
         font-weight: bold;
         margin: 2px;
         padding: 6px;
+        float: left;
+    }
+
+    .refresh_url {
+        float: right;
+    }
+
+    .build_result {
+        clear: left;
     }
 
     .url {
@@ -32,14 +41,21 @@
     td {
         border-bottom: 1px solid #eee;
         padding: 2px;
-
     }
+
+    table {
+        border-spacing: 0px;
+        padding-bottom: 4px;
+    }
+
 </style>
 <script src="status.js"></script>
 </head>
 <body onload="hudson.status.show()">
 <div id="content">
-    <span id="heading" class="heading">Loading...</span>
+    <div id="heading" class="heading">Loading...</div>
+    <div id="refresh_url" class="refresh_url"></div>
+    <div id="build_result" class="build_result"></div
 </div>
 <div>
     <span id="options"></span>

@@ -1,5 +1,8 @@
 var hudson = hudson || {};
-hudson.results = { lastUpdate : 'never' };
+hudson.results = {
+    lastUpdate : 'never',
+    onChange : undefined
+};
 
 hudson.open = function() {
     function sameUrl(orig, other) {
@@ -111,6 +114,9 @@ hudson.init = function (conf, results) {
             var failed_jobs = getFailedJobsNames(results.hudson.jobs);
             setState(build.failed, getBuildFailedMessage( failed_jobs ));
         }
+        if (typeof results.onChange !== "undefined") {
+            results.onChange();
+        }
     }
 
     function getBuildFailedMessage(failed_jobs) {
@@ -132,6 +138,7 @@ hudson.init = function (conf, results) {
     return function () {
         setState(build.unknown, "Build status unknown");
         start();
+        hudson.start = start; /* allowing call from popup */
     };
 
 }(hudson.conf, hudson.results);

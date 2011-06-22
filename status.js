@@ -49,18 +49,48 @@ hudson.status = function() {
     function timeSince(d) {
         var now = new Date(),
             minutes = Math.round((now.getTime() - d.getTime()) / (1000 * 60));
-        return d.toLocaleTimeString() +  " (" + minutes + " minutes ago)";
+        return d.toLocaleTimeString() + " (" + minutes + " minute" + (1 == minutes ? "" : "s") + " ago)";
+    }
+
+    function createRefreshLink() {
+        var link = document.createElement('button');
+        link.innerText = "Refresh";
+        link.addEventListener("click", refreshStatus);
+        return link;
+    }
+
+    function refreshStatus(evt) {
+        var button_clicked = evt.currentTarget;
+        button_clicked.setAttribute('disabled', true);
+        var background = chrome.extension.getBackgroundPage().hudson;
+        background.results.onChange = function () {
+            background.results.onChange = undefined;
+            hudson.status.show();
+            button_clicked.removeAttribute('disabled');
+        };
+        background.start();
+    }
+
+    function removeChildren(node) {
+        while (node.firstChild) {
+            node.removeChild(node.firstChild);
+        }
     }
 
     return { show : function () {
         var hudson = chrome.extension.getBackgroundPage().hudson, 
             options = document.getElementById('options'), 
             lastUpdate = document.createElement('div'), 
-            content = document.getElementById('content'),
+            content = document.getElementById('build_result'),
             heading = document.getElementById('heading'),
+            refresh_url = document.getElementById('refresh_url'),
             url = document.createElement('div');
         
         heading.innerText = "Hudson Status ";
+        removeChildren(refresh_url);
+        refresh_url.appendChild(createRefreshLink());
+        
+        removeChildren(content);
         url.className = 'url';
         url.appendChild(link(hudson.conf.hudsonURL()));
         content.appendChild(url);
@@ -74,6 +104,7 @@ hudson.status = function() {
             content.appendChild(list);
         }
         
+        removeChildren(options);
         lastUpdate.innerText = "Last Update: " + timeSince(hudson.results.lastUpdate);
         options.appendChild(lastUpdate);
         options.appendChild(link(chrome.extension.getURL('options.html'), 'Options'));
