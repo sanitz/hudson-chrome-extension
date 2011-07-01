@@ -1,6 +1,7 @@
 var hudson = hudson || {};
 hudson.results = {
     lastUpdate : 'never',
+    lastJobs : undefined,
     onChange : undefined
 };
 
@@ -108,33 +109,117 @@ hudson.init = function (conf, results) {
             return;
         }
         results.error = undefined;
+
+        if (typeof results.lastJobs !== 'undefined') {
+            var changes = getChangedJobs(results.lastJobs, results.hudson.jobs);
+            showNotifications(changes);
+        }
+        results.lastJobs = results.hudson.jobs;
+
         if (isSuccess(results.hudson.jobs)) {
             setState(build.ok, "Build OK");
         } else {
             var failed_jobs = getFailedJobsNames(results.hudson.jobs);
-            setState(build.failed, getBuildFailedMessage( failed_jobs ));
+            setState(
+                build.failed, 
+                indentLines(
+                    getJobsMessages("Failed", failed_jobs),
+                    "    "
+                ).join("\n")
+            );
         }
-        if (typeof results.onChange !== "undefined") {
+        if (typeof results.onChange !== 'undefined') {
             results.onChange();
         }
     }
-
-    function getBuildFailedMessage(failed_jobs) {
-        if (1 == failed_jobs.length) {
-            return "Build \"" + failed_jobs[0] + "\" Failed!";
-        } else {
-            var max_failed_jobs_in_list = 5;
-            if (failed_jobs.length > max_failed_jobs_in_list) {
-                var not_shown_jobs = (failed_jobs.length - max_failed_jobs_in_list);
-                failed_jobs = failed_jobs.slice(0, max_failed_jobs_in_list);
-                failed_jobs.push("... " + not_shown_jobs + " more");
-            }
-            /* adding some indent */
-            failed_jobs = failed_jobs.map(function (name) { return "    " + name});
-            return "Builds Failed:\n" + failed_jobs.join("\n");
+    
+    function showNotifications(changes) {
+        if (changes.fixed.length) {
+            hudson.notifications.showMessages( 
+                "green_big.png",
+                getJobsMessages("became Stable", changes.fixed)
+            );
+        }
+        if (changes.failed.length) {
+            hudson.notifications.showMessages( 
+                "red_big.png",
+                getJobsMessages("Failed", changes.failed)
+            );
         }
     }
 
+    function indentLines(lines, indent) {
+        var ignoreFirst = 0;
+        return lines.map(function (name) { 
+            return (ignoreFirst++ ? indent : "") + name;
+        });
+    }
+    
+    function getJobsMessages(verb, jobs) {
+        if (1 == jobs.length) {
+            return [ "Build \"" + jobs[0] + "\" " + verb + "!" ];
+        } else {
+            var max_jobs_in_list = 5;
+            if (jobs.length > max_jobs_in_list) {
+                var not_shown_jobs = (jobs.length - max_jobs_in_list);
+                jobs = jobs.slice(0, max_jobs_in_list);
+                jobs.push("... " + not_shown_jobs + " more");
+            }
+            jobs.unshift("Builds " + verb + ":");
+            return jobs;
+        }
+    }
+    
+    function getChangedJobs(old_jobs, new_jobs) {
+        var old_by_status = groupJobsNamesByStatus(old_jobs);
+        var new_by_status = groupJobsNamesByStatus(new_jobs);
+        var diff_jobs_failed = arraySymmetricDifference(
+            old_by_status.failed,
+            new_by_status.failed
+        );
+        return {
+            fixed : diff_jobs_failed[0],
+            failed : diff_jobs_failed[1]
+        };
+    }
+
+    function groupJobsNamesByStatus(jobs) {
+        var jobs_by_status = {
+            ok : [],
+            failed : []
+        };
+        jobs.forEach(function (job) {
+            if (successColors.test(job.color)) {
+                jobs_by_status.ok.push(job.name);
+            } else {
+                jobs_by_status.failed.push(job.name);
+            }
+        });
+        return jobs_by_status;
+    }
+    
+    function arraySymmetricDifference(array1, array2) {
+        var exists_in = {};
+        var exists_only_in_2 = [];
+        array1.forEach(function (elem) {
+            exists_in[elem] = 1;
+        });
+        array2.forEach(function (elem) {
+            if (elem in exists_in) {
+                exists_in[elem] = 2; // exists in both
+            } else {
+                exists_only_in_2.push(elem);
+            }
+        });
+        var exists_only_in_1 = [];
+        for(var elem in exists_in) {
+            if (1 === exists_in[elem]) {
+                exists_only_in_1.push(elem);
+            }
+        }
+        return [exists_only_in_1, exists_only_in_2];
+    }
+    
     return function () {
         setState(build.unknown, "Build status unknown");
         start();

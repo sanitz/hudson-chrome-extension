@@ -1,5 +1,5 @@
 hudson.options = function(conf) {
-    var hudsonUrlTextbox, pollIntervallTextbox, saveButton, saveStatus;
+    var hudsonUrlTextbox, pollIntervallTextbox, notificationsCheckbox, saveButton, saveStatus;
 
     function showSaveStatus(show) {
         saveStatus.style.display = show ? '' : "none";
@@ -9,6 +9,7 @@ hudson.options = function(conf) {
     function display() {
         hudsonUrlTextbox.value = conf.hudsonURL();
         pollIntervallTextbox.value = conf.pollIntervall();
+        notificationsCheckbox.checked = conf.notifications();
         saveButton.disabled = true;
     }
 
@@ -16,7 +17,8 @@ hudson.options = function(conf) {
         save : function () {
             conf.set({ 
                 hudsonURL : hudsonUrlTextbox.value,
-                pollIntervall: pollIntervallTextbox.value 
+                pollIntervall: pollIntervallTextbox.value,
+                notifications: notificationsCheckbox.checked
             });
             showSaveStatus(true);
             display();
@@ -27,10 +29,10 @@ hudson.options = function(conf) {
             showSaveStatus(false)
         },
 
-
         init : function () {
             hudsonUrlTextbox = document.getElementById("hudson-url"), 
             pollIntervallTextbox = document.getElementById("poll-intervall"), 
+            notificationsCheckbox = document.getElementById("desktop-notifications"), 
             saveButton = document.getElementById("save-button");
             saveStatus = document.getElementById("save-status");
             display();
