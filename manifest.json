@@ -12,6 +12,7 @@
     },
     "permissions": [
         "tabs",
+        "notifications",
         "http://*/",
         "https://*/"
     ]

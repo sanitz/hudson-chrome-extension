@@ -9,10 +9,13 @@
     <div id="header"><h1>Hudson Extension</h1></div>
 
     <div class="section-header first">Options</div>
-    <p>Enter the URL of your Hudson here:</p>
+    <p><label for="hudson-url">Enter the URL of your Hudson here</label>:</p>
     <input type="text" id="hudson-url" oninput="hudson.options.markDirty()">
-    <p>Enter poll intervall in in minutes:</p>
+    <p><label for="poll-intervall">Enter poll intervall in in minutes</label>:</p>
     <input type="text" id="poll-intervall" oninput="hudson.options.markDirty()">
+    <p><label for="desktop-notifications">Enable Desktop Notifications</label> 
+        <input type="checkbox" id="desktop-notifications" onchange="hudson.options.markDirty()">
+    </p>
     <div class="footer">
         <button id="save-button" style="font-weight:bold" onclick="hudson.options.save()" >Save</button>
         <button onclick="hudson.options.init()">Cancel</button>
