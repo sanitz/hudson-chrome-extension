@@ -26,7 +26,8 @@ Google Extension site][extension_site].
 
 Changelog
 ----------
-
-TODO
+- Disabled horizontal scroll (Ivan Nevostruev)
+- refresh button in popup (Ivan Nevostruev)
+- desktop notification (Ivan Nevostruev)
 
 [extension_site]: http://bit.ly/hudson_extension
