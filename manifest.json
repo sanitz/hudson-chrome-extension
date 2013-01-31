@@ -1,19 +1,23 @@
 {
     "name": "Hudson Extension",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "description": "This Extensions monitors Hudson.",
+    "background": {
+        "scripts": ["conf.js", "notifications.js", "background.js"]
+    },
     "icons": { "128": "icon128.png" },
+
     "options_page": "options.html",
-    "background_page": "background.html",
     "browser_action": {
-       "default_icon": "icon.png",
-       "default_title": "Hudson",
-       "popup" : "status.html"
+    "default_icon": "icon.png",    
+    "default_title": "Hudson",
+    "default_popup" : "status.html"
     },
     "permissions": [
         "tabs",
         "notifications",
         "http://*/",
         "https://*/"
-    ]
+    ],
+    "manifest_version": 2
 }

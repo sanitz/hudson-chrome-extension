@@ -227,3 +227,6 @@ hudson.init = function (conf, results) {
     };
 
 }(hudson.conf, hudson.results);
+
+//new place to initialize the system
+window.onload = hudson.init
