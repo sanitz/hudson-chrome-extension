@@ -105,7 +105,7 @@ hudson.init = function (conf, results) {
         try {
             results.hudson = JSON.parse(text);
         } catch (e) {
-            onerror("Failed to parse JSON data from " + conf.hudsonUrl() + ": " + e);
+            onerror("Failed to parse JSON data from " + conf.hudsonURL() + ": " + e);
             return;
         }
         results.error = undefined;
