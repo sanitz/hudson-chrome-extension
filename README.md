@@ -29,5 +29,6 @@ Changelog
 - Disabled horizontal scroll (Ivan Nevostruev)
 - refresh button in popup (Ivan Nevostruev)
 - desktop notification (Ivan Nevostruev)
+- manifest_version 2 compatibility (Jyry Suvilehto)
 
 [extension_site]: http://bit.ly/hudson_extension
