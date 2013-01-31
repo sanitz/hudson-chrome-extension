@@ -19,5 +19,9 @@
         "http://*/",
         "https://*/"
     ],
+    "web_accessible_resources": [
+        "green_big.png",
+        "red_big.png"
+    ],
     "manifest_version": 2
 }
