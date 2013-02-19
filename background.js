@@ -77,7 +77,12 @@ hudson.init = function (conf, results) {
     }
 
     function start() {
+        if (xhr != undefined){
+          xhr.abort(); 
+        }
+        else {
         xhr = new XMLHttpRequest();
+        }
         xhr.onreadystatechange = onchange;
         xhr.open("GET", conf.apiURL(), true);
         try {
