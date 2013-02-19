@@ -66,9 +66,6 @@ hudson.init = function (conf, results) {
 
     function timeout () {
         console.log("timeout");
-        if (xhr) {
-            xhr.abort();
-        }
         newRequest();
     }
 
