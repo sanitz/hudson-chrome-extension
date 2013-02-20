@@ -40,3 +40,13 @@ hudson.options = function(conf) {
     };
 }(hudson.conf);
 
+//set event handlers
+window.onload = setEventHandlers;
+function setEventHandlers(){
+    document.getElementById("hudson-url").oninput = hudson.options.markDirty;
+    document.getElementById("desktop-notifications").onchange = hudson.options.markDirty;
+    document.getElementById("poll-intervall").oninput = hudson.options.markDirty;
+    document.getElementById("save-button").onclick = hudson.options.save;
+    document.getElementById("cancel-button").onclick = hudson.options.save;
+    hudson.options.init();
+}

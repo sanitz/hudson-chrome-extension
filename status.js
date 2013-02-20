@@ -110,4 +110,5 @@ hudson.status = function() {
         options.appendChild(link(chrome.extension.getURL('options.html'), 'Options'));
     }}
 }();
-
+//yet another event handler
+window.onload = hudson.status.show;

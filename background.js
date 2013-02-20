@@ -66,9 +66,6 @@ hudson.init = function (conf, results) {
 
     function timeout () {
         console.log("timeout");
-        if (xhr) {
-            xhr.abort();
-        }
         newRequest();
     }
 
@@ -77,7 +74,12 @@ hudson.init = function (conf, results) {
     }
 
     function start() {
-        xhr = new XMLHttpRequest();
+        if (xhr != undefined){
+            xhr.abort(); 
+        }
+        else {
+            xhr = new XMLHttpRequest();
+        }
         xhr.onreadystatechange = onchange;
         xhr.open("GET", conf.apiURL(), true);
         try {
@@ -105,7 +107,7 @@ hudson.init = function (conf, results) {
         try {
             results.hudson = JSON.parse(text);
         } catch (e) {
-            onerror("Failed to parse JSON data from " + conf.hudsonUrl() + ": " + e);
+            onerror("Failed to parse JSON data from " + conf.hudsonURL() + ": " + e);
             return;
         }
         results.error = undefined;
@@ -227,3 +229,6 @@ hudson.init = function (conf, results) {
     };
 
 }(hudson.conf, hudson.results);
+
+//new place to initialize the system
+window.onload = hudson.init
